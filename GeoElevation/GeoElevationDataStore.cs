@@ -6,6 +6,8 @@ using System.Linq;
 
 namespace FinalSurge.GeoElevation
 {
+    using System.Collections.Concurrent;
+
     /// <summary>
     /// The geo elevation data store base class.
     /// </summary>
@@ -14,7 +16,7 @@ namespace FinalSurge.GeoElevation
         /// <summary>
         /// The data file directory.
         /// </summary>
-        protected readonly string DataFileDirectory;
+        private readonly string dataFileDirectory;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="GeoElevationDataStore"/> class.
@@ -29,13 +31,21 @@ namespace FinalSurge.GeoElevation
                 throw new DirectoryNotFoundException($"Data file directory not found: {dataFileDirectory}");
             }
 
-            this.DataFileDirectory = dataFileDirectory;
+            this.dataFileDirectory = dataFileDirectory;
+        }
+
+        protected enum DataFileNamingType
+        {
+            SouthwestCorner,
+            NorthwestCorner
         }
 
         /// <summary>
         /// Gets the data file extension.
         /// </summary>
         protected abstract string DataFileExtension { get; }
+
+        protected abstract DataFileNamingType DataFileNaming { get; }
 
         /// <summary>
         /// Gets the row count.
@@ -129,8 +139,8 @@ namespace FinalSurge.GeoElevation
         /// <summary>
         /// Gets the elevation value from the provided data file stream for the specified coordinates.
         /// </summary>
-        /// <param name="stream">
-        /// The data file stream.
+        /// <param name="fileStreamCache">
+        /// The data file stream cache.
         /// </param>
         /// <param name="targetCoordinates">
         /// The target coordinates.
@@ -138,8 +148,33 @@ namespace FinalSurge.GeoElevation
         /// <returns>
         /// The <see cref="Nullable{Double}"/> elevation value; null if not found or invalid.
         /// </returns>
-        protected virtual double? GetElevation(FileStream stream, GeoCoordinate targetCoordinates)
+        protected virtual double? GetElevation(ConcurrentDictionary<string, FileStream> fileStreamCache, GeoCoordinate targetCoordinates)
         {
+            var filename = this.DataFileNaming == DataFileNamingType.SouthwestCorner
+                               ? $"{GetSouthwestCornerFilename(targetCoordinates)}"
+                               : $"{GetNorthwestCornerFilename(targetCoordinates)}";
+
+            filename = $"{filename}.{this.DataFileExtension}";
+
+            FileStream stream;
+            if (!fileStreamCache.TryGetValue(filename, out stream))
+            {
+                try
+                {
+                    stream = File.OpenRead(this.dataFileDirectory + filename);
+                    fileStreamCache.TryAdd(filename, stream);
+                }
+                catch (FileNotFoundException)
+                {
+                    fileStreamCache.TryAdd(filename, null);
+                }
+            }
+
+            if (stream == null)
+            {
+                return null;
+            }
+
             var extraRows = this.RowCount - (1.0 / Math.Abs(this.LatitudeInterval));
             var extraCols = this.ColumnCount - (1.0 / Math.Abs(this.LongitudeInterval));
 

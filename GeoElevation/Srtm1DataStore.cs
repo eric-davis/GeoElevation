@@ -41,6 +41,11 @@ namespace FinalSurge.GeoElevation
         protected override string DataFileExtension => "hgt";
 
         /// <summary>
+        /// The data file naming convention type.
+        /// </summary>
+        protected override DataFileNamingType DataFileNaming => DataFileNamingType.SouthwestCorner;
+
+        /// <summary>
         /// The row count.
         /// </summary>
         protected override int RowCount => 3601;
@@ -96,24 +101,7 @@ namespace FinalSurge.GeoElevation
         /// </returns>
         public double? GetElevation(GeoCoordinate targetCoordinates)
         {
-            var filename = $"{GetSouthwestCornerFilename(targetCoordinates)}.{this.DataFileExtension}";
-            FileStream stream;
-            if (!FileStreams.TryGetValue(filename, out stream))
-            {
-                try
-                {
-                    stream = File.OpenRead(this.DataFileDirectory + filename);
-                }
-                catch (FileNotFoundException)
-                {
-                    FileStreams.TryAdd(filename, null);
-                    return null;
-                }
-
-                FileStreams.TryAdd(filename, stream);
-            }
-
-            return this.GetElevation(stream, targetCoordinates);
+            return this.GetElevation(FileStreams, targetCoordinates);
         }
     }
 }

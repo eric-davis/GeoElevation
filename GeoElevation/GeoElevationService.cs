@@ -4,6 +4,8 @@ using System.Device.Location;
 
 namespace FinalSurge.GeoElevation
 {
+    using System.IO;
+
     /// <summary>
     /// The geo elevation service.
     /// </summary>
@@ -50,6 +52,30 @@ namespace FinalSurge.GeoElevation
             string srtm1DataDirectory,
             string srtm3DataDirectory)
         {
+            if (!Directory.Exists(ned1DataDirectory))
+            {
+                throw new DirectoryNotFoundException(
+                    $"Specified {nameof(ned1DataDirectory)} was not found: {ned1DataDirectory}");
+            }
+
+            if (!Directory.Exists(ned2DataDirectory))
+            {
+                throw new DirectoryNotFoundException(
+                    $"Specified {nameof(ned2DataDirectory)} was not found: {ned2DataDirectory}");
+            }
+
+            if (!Directory.Exists(srtm1DataDirectory))
+            {
+                throw new DirectoryNotFoundException(
+                    $"Specified {nameof(srtm1DataDirectory)} was not found: {srtm1DataDirectory}");
+            }
+
+            if (!Directory.Exists(srtm3DataDirectory))
+            {
+                throw new DirectoryNotFoundException(
+                    $"Specified {nameof(srtm3DataDirectory)} was not found: {srtm3DataDirectory}");
+            }
+
             this.ned1DataDirectory = ned1DataDirectory;
             this.ned2DataDirectory = ned2DataDirectory;
             this.srtm1DataDirectory = srtm1DataDirectory;

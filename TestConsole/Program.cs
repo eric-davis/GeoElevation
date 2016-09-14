@@ -17,8 +17,9 @@ namespace TestConsole
             var srtm1DataFileDirectory = @"C:\DEV\TempData\Elevation\SRTM1\";
             var srtm3DataFileDirectory = @"C:\DEV\TempData\Elevation\SRTM3\";
 
-            var coords = new GeoCoordinate(35.9297645, -78.5790372); // SRTM1 File = N35W079.hgt; Altitude = 79.4 m
-            //var coords = new GeoCoordinate(61.218056, -149.900278); // SRTM1 File = N61W150.hgt; Altitude = 35.9664 m
+            var coords = new GeoCoordinate(35.9297645, -78.5790372); // Raleigh, NC --> N35W079.hgt / N36W079.ele
+            //var coords = new GeoCoordinate(61.218056, -149.900278); // Anchorage, AK --> N61W150.hgt / N62W150.ele
+            //var coords = new GeoCoordinate(55.755825, 37.6173); // Moscow, Russia --> N55E037.hgt
 
             var ned1Elevation = new Ned1DataStore(ned1DataFileDirectory).GetElevation(coords);
             var ned2Elevation = new Ned2DataStore(ned2DataFileDirectory).GetElevation(coords);
@@ -30,6 +31,15 @@ namespace TestConsole
             Console.WriteLine($"NED2 = {ned2Elevation} m");
             Console.WriteLine($"SRTM1 = {srtm1Elevation} m");
             Console.WriteLine($"SRTM3 = {srtm3Elevation} m");
+
+            var service = new GeoElevationService(
+                ned1DataFileDirectory,
+                ned2DataFileDirectory,
+                srtm1DataFileDirectory,
+                srtm3DataFileDirectory);
+
+            var elevation = service.GetElevation(coords);
+            Console.WriteLine($"\nElevation = {elevation} m");
 
             /*
             var service = new GeoElevationService(
