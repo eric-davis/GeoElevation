@@ -34,9 +34,19 @@ namespace FinalSurge.GeoElevation
             this.dataFileDirectory = dataFileDirectory;
         }
 
+        /// <summary>
+        /// The data file naming type.
+        /// </summary>
         protected enum DataFileNamingType
         {
+            /// <summary>
+            /// Based upon southwest corner.
+            /// </summary>
             SouthwestCorner,
+
+            /// <summary>
+            /// Based upon northwest corner.
+            /// </summary>
             NorthwestCorner
         }
 
@@ -45,6 +55,9 @@ namespace FinalSurge.GeoElevation
         /// </summary>
         protected abstract string DataFileExtension { get; }
 
+        /// <summary>
+        /// Gets the data file naming.
+        /// </summary>
         protected abstract DataFileNamingType DataFileNaming { get; }
 
         /// <summary>
